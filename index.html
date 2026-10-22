@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APAAR | Student Data Management</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Login screen -->
+    <section id="login-screen" class="login-screen">
+      <div class="login-art">
+        <div class="institution-seal"><span>AICTE</span><b>✦</b><small>APPROVED</small></div>
+        <div class="brand-word">APAAR</div>
+        <h1>Student Data Management<br />and Verification Platform</h1>
+        <p class="login-subtitle">For AICTE-Approved Institutions</p>
+        <div class="trust-row">
+          <div><span class="trust-icon">♢</span><small>Secure<br />Records</small></div>
+          <div><span class="trust-icon">✓</span><small>Verified</small></div>
+          <div><span class="trust-icon">⬡</span><small>Transparent</small></div>
+        </div>
+        <div class="book-stack"><div></div><div></div><div></div><span>◆</span></div>
+      </div>
+      <form class="login-card" id="login-form">
+        <h2>Welcome Back</h2>
+        <p>Login to access your institutional dashboard</p>
+        <label for="login-email">Email address</label>
+        <input id="login-email" type="email" placeholder="admin@mitaoe.ac.in" autocomplete="username" required />
+        <label for="login-password">Password</label>
+        <div class="password-wrap"><input id="login-password" type="password" placeholder="Enter password" autocomplete="current-password" required /><button type="button" id="toggle-password" class="eye-btn" aria-label="Show password">◉</button></div>
+        <button class="primary full" type="submit">Login</button>
+        <label class="role-label">Select Role</label>
+        <label class="radio-line"><input type="radio" name="role" value="Institution Admin" checked /> <span>Institution Admin</span></label>
+        <label class="radio-line"><input type="radio" name="role" value="AICTE Admin" /> <span>AICTE Admin</span></label>
+        <label class="radio-line"><input type="radio" name="role" value="Verifier / Employer" /> <span>Verifier / Employer</span></label>
+        <a class="forgot" href="#" id="forgot-password">Forgot Password?</a>
+      </form>
+    </section>
+
+    <!-- Main application -->
+    <section id="workspace" class="workspace hidden">
+      <aside class="sidebar">
+        <div class="side-brand"><span class="mini-logo">A</span><b>APAAR</b></div>
+        <nav class="side-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-page="dashboard"><span>⌂</span>Dashboard</button>
+          <button class="nav-item" data-page="students"><span>♙</span>Students</button>
+          <button class="nav-item" data-page="validation"><span>▣</span>Validation Results</button>
+          <button class="nav-item" data-page="reports"><span>▤</span>Reports</button>
+          <button class="nav-item" data-page="settings"><span>⚙</span>Settings</button>
+        </nav>
+        <div class="sidebar-bottom"><span class="secure-dot"></span> Secure workspace <button id="logout-btn">↪ Log out</button></div>
+      </aside>
+      <main class="main-area">
+        <header class="topbar">
+          <div class="institution-mark"><div class="small-seal">✦</div><div><strong>MIT Academy of Engineering</strong><small>Institution ID: — | AICTE Approved</small></div></div>
+          <div class="topbar-actions"><select id="academic-year" aria-label="Academic year"><option>2026</option><option>2025</option><option>2024</option></select><button class="icon-btn" title="Notifications" id="notifications-btn">♧<i></i></button><div class="user-profile"><div class="avatar">P</div><div><strong id="user-name">Institution Admin</strong><small id="user-role">Institution Admin</small></div></div></div>
+        </header>
+        <div class="page-content">
+          <!-- Dashboard -->
+          <section class="page active" id="page-dashboard">
+            <div class="page-heading"><div><h1>Dashboard</h1><p>Overview of student data for academic year <span class="year-text">2026</span></p></div></div>
+            <div class="stat-grid">
+              <article class="stat-card"><div class="stat-icon blue">▥</div><div><small>Approved Intake</small><strong id="stat-intake">—</strong></div></article>
+              <article class="stat-card"><div class="stat-icon green">♙</div><div><small>Actual Enrolment</small><strong id="stat-enrolment">—</strong></div></article>
+              <article class="stat-card"><div class="stat-icon amber">◉</div><div><small>Remaining Seats</small><strong id="stat-seats">—</strong></div></article>
+              <article class="stat-card"><div class="stat-icon violet">♧</div><div><small>Total Students</small><strong id="stat-total">0</strong></div></article>
+            </div>
+            <div class="dashboard-grid">
+              <article class="panel trend-panel"><div class="panel-heading"><h3>Enrolment Trend</h3><span class="legend"><i class="legend-blue"></i> Actual Enrolment <i class="legend-grey"></i> Approved Intake</span></div><div class="chart-empty"><div class="chart-y-labels"><span>800</span><span>600</span><span>400</span><span>200</span><span>0</span></div><div class="chart-area"><div class="chart-grid-lines"><i></i><i></i><i></i><i></i><i></i></div><div class="chart-placeholder"><span>Chart will appear when records are added</span></div><div class="chart-x-labels"><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span></div></div></div></article>
+              <article class="panel distribution-panel"><div class="panel-heading"><h3>Student Category Distribution</h3></div><div class="distribution-empty"><div class="empty-donut"><span>0<small>Total Students</small></span></div><p>No category data yet</p></div><div class="category-legend"><span><i class="c1"></i>General</span><span><i class="c2"></i>OBC</span><span><i class="c3"></i>SC / ST</span><span><i class="c4"></i>Other categories</span></div></article>
+              <article class="panel activity-panel"><div class="panel-heading"><h3>Recent Activities</h3><button class="text-btn" data-goto="students">View all</button></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Activity</th><th>Details</th><th>Date &amp; Time</th></tr></thead><tbody id="activity-body"><tr class="empty-row"><td colspan="4">No recent activity yet. Activity will appear here as you work.</td></tr></tbody></table></div></article>
+              <article class="panel quick-panel"><div class="panel-heading"><h3>Quick Actions</h3></div><button class="quick-action" data-goto="students"><span>♙</span>Add New Student</button><button class="quick-action" data-goto="students"><span>▤</span>View Student List</button><button class="quick-action" data-goto="validation"><span>✓</span>Check Validation Results</button><button class="quick-action" data-goto="reports"><span>⇩</span>Download Reports</button></article>
+            </div>
+          </section>
+
+          <!-- Students -->
+          <section class="page" id="page-students">
+            <div class="page-heading"><div><h1>Student Records</h1><p>Manage and update student information</p></div><button class="primary" id="add-student-btn"><span>＋</span> Add Student</button></div>
+            <div class="panel records-panel"><div class="search-row"><div class="search-input"><span>⌕</span><input id="student-search" placeholder="Search by name, APAAR ID, or student ID..." /></div></div><div class="filter-row"><select id="course-filter"><option value="">All Courses</option><option>B.Tech CSE</option><option>B.Tech AIML</option><option>B.Tech ECE</option><option>B.Tech Mechanical</option><option>B.Pharm</option><option>MBA</option></select><select id="category-filter"><option value="">All Categories</option><option>General</option><option>OBC</option><option>SC</option><option>ST</option><option>NT</option><option>OBC-NCL</option><option>NRI</option><option>OCI</option><option>Foreign National</option></select><select id="status-filter"><option value="">All Status</option><option>Not Checked</option><option>Pending</option><option>Verified</option><option>Failed</option><option>Needs Correction</option><option>Flagged</option></select><button class="primary search-btn" id="search-btn">Search</button></div><div class="table-wrap student-table-wrap"><table><thead><tr><th>#</th><th>Name</th><th>APAAR ID</th><th>Course</th><th>Year</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead><tbody id="students-body"><tr class="empty-row"><td colspan="8"><div class="empty-state"><span class="empty-symbol">♙</span><strong>No student records yet</strong><small>Add student records after connecting your backend.</small><button class="outline small" id="empty-add-btn">＋ Add Student</button></div></td></tr></tbody></table></div><div class="table-footer"><span id="record-count">Showing 0 of 0 records</span><div class="pagination"><button disabled>‹</button><button class="current">1</button><button disabled>›</button></div></div></div>
+          </section>
+
+          <!-- Add / edit student -->
+          <section class="page" id="page-add-student">
+            <div class="page-heading"><div><h1 id="student-form-title">Add New Student</h1><p>Enter student details to add a new record</p></div><button class="outline" data-goto="students">← Back to Student List</button></div>
+            <form id="student-form" class="panel student-form-panel">
+              <input type="hidden" id="edit-id" />
+              <div class="form-section"><h3>Personal Information</h3><div class="form-grid two-col"><div class="field"><label for="student-name">Student Name <em>*</em></label><input id="student-name" required placeholder="Enter full name" /></div><div class="field"><label for="apaar-id">APAAR ID <em>*</em></label><div class="inline-verify"><input id="apaar-id" inputmode="numeric" maxlength="12" required placeholder="Enter 12-digit APAAR ID" /><button type="button" class="outline verify-btn" id="verify-apaar-btn">Verify APAAR</button></div><small id="verify-message" class="field-hint">Verification status will be shown here.</small></div><div class="field"><label for="dob">Date of Birth <em>*</em></label><input id="dob" type="date" required /></div><div class="field"><label for="gender">Gender <em>*</em></label><select id="gender" required><option value="">Select gender</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select></div></div></div>
+              <div class="form-section"><h3>Institution &amp; Course Details</h3><div class="form-grid three-col"><div class="field"><label for="course">Course <em>*</em></label><select id="course" required><option value="">Select course</option><option>B.Tech CSE</option><option>B.Tech AIML</option><option>B.Tech ECE</option><option>B.Tech Mechanical</option><option>B.Pharm</option><option>MBA</option><option>Other</option></select></div><div class="field"><label for="admission-year">Admission Year <em>*</em></label><select id="admission-year" required><option value="">Select year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option></select></div><div class="field"><label for="college-student-id">Student ID (College) <em>*</em></label><input id="college-student-id" required placeholder="e.g. MIT001" /></div></div></div>
+              <div class="form-section"><h3>Category Details</h3><div class="form-grid four-col"><div class="field"><label for="category">Student Category</label><select id="category"><option value="">Select category</option><option>General</option><option>OBC</option><option>SC</option><option>ST</option><option>NT</option><option>OBC-NCL</option><option>NRI</option><option>OCI</option><option>Foreign National</option></select></div><div class="field"><label for="nri-status">NRI Category</label><select id="nri-status"><option>No</option><option>Yes</option></select></div><div class="field"><label for="oci-status">OCI Status</label><select id="oci-status"><option>No</option><option>Yes</option></select></div><div class="field"><label for="foreign-status">Foreign National (FN)</label><select id="foreign-status"><option>No</option><option>Yes</option></select></div></div><div class="form-grid two-col short-row"><div class="field"><label for="supernumerary">Supernumerary Seats</label><input id="supernumerary" type="number" min="0" value="0" /></div></div></div>
+              <div class="form-section"><h3>Additional Information</h3><div class="field"><label for="remarks">Remarks (if any)</label><textarea id="remarks" rows="3" placeholder="Enter any additional notes..."></textarea></div></div>
+              <div class="form-actions"><button type="button" class="outline" data-goto="students">Cancel</button><button type="submit" class="primary">Save Student</button></div>
+            </form>
+          </section>
+
+          <!-- Validation -->
+          <section class="page" id="page-validation">
+            <div class="page-heading"><div><h1>Validation Results</h1><p>Summary of data validation checks</p></div><div class="heading-actions"><select id="validation-period"><option>Current Academic Year</option><option>All Academic Years</option></select><button class="primary" id="export-validation">⇩ Export</button></div></div>
+            <div class="stat-grid validation-stats"><article class="stat-card"><div class="stat-icon blue">▤</div><div><small>Total Records</small><strong id="val-total">0</strong></div></article><article class="stat-card"><div class="stat-icon green">✓</div><div><small>Valid</small><strong id="val-valid">0</strong><small class="sub-stat">Records marked verified</small></div></article><article class="stat-card"><div class="stat-icon amber">●</div><div><small>Needs Correction</small><strong id="val-correction">0</strong></div></article><article class="stat-card"><div class="stat-icon red">⚠</div><div><small>Flagged</small><strong id="val-flagged">0</strong></div></article></div>
+            <div class="panel validation-panel"><div class="tabs" role="tablist"><button class="tab active" data-validation-tab="issues">Issues Breakdown</button><button class="tab" data-validation-tab="invalid">Invalid / Missing APAAR ID</button><button class="tab" data-validation-tab="duplicates">Duplicate Records</button><button class="tab" data-validation-tab="intake">Exceeds Intake</button><button class="tab" data-validation-tab="inconsistent">Inconsistent Data</button></div><div class="issue-content"><div class="table-wrap"><table><thead><tr><th>Issue Type</th><th>Count</th><th>Details</th><th>Status</th></tr></thead><tbody id="issues-body"><tr class="empty-row"><td colspan="4">No validation issues to display. Add records and run validation.</td></tr></tbody></table></div><div class="issue-chart"><div class="empty-donut large"><span>0<small>Total Issues</small></span></div><p>Issue distribution will appear after validation.</p></div></div><div class="panel-subheading"><h3>Records Requiring Attention</h3><button class="text-btn" id="run-validation">Run Validation</button></div><div class="table-wrap"><table><thead><tr><th>Student Name</th><th>APAAR ID</th><th>Issue</th><th>Status</th><th>Action</th></tr></thead><tbody id="flagged-body"><tr class="empty-row"><td colspan="5">No records require attention.</td></tr></tbody></table></div></div>
+          </section>
+
+          <!-- Reports -->
+          <section class="page" id="page-reports"><div class="page-heading"><div><h1>Reports</h1><p>Generate and export institution student data reports</p></div></div><div class="report-grid"><article class="panel report-card"><div class="report-icon blue">▤</div><h3>Student Records Report</h3><p>Export the student list and current verification statuses.</p><button class="outline" data-export="students">⇩ Export CSV</button></article><article class="panel report-card"><div class="report-icon amber">⚠</div><h3>Validation Issues Report</h3><p>Review records that need correction or further verification.</p><button class="outline" data-export="issues">⇩ Export CSV</button></article><article class="panel report-card"><div class="report-icon green">▥</div><h3>Enrolment Summary</h3><p>Export a summary of enrolment by course and category.</p><button class="outline" data-export="summary">⇩ Export CSV</button></article></div><div class="panel report-note"><span>ⓘ</span><div><strong>Reports use records stored in this browser for now.</strong><p>When the backend is connected, replace local storage actions with authorized server requests.</p></div></div></section>
+
+          <!-- Settings -->
+          <section class="page" id="page-settings"><div class="page-heading"><div><h1>Settings</h1><p>Manage your institution profile and preferences</p></div></div><div class="panel settings-panel"><div class="settings-tabs"><button class="settings-tab active" data-settings-tab="profile">Institution Profile</button><button class="settings-tab" data-settings-tab="users">User Management</button><button class="settings-tab" data-settings-tab="upload">Data &amp; Upload</button><button class="settings-tab" data-settings-tab="notifications">Notifications</button><button class="settings-tab" data-settings-tab="security">Security</button></div><div class="settings-content" id="settings-profile"><form id="settings-form"><div class="settings-grid"><div class="settings-fields"><div class="field"><label for="institution-name">Institution Name</label><input id="institution-name" value="MIT Academy of Engineering" /></div><div class="field"><label for="institution-id">Institution ID</label><input id="institution-id" placeholder="Enter institution ID" /></div><div class="field"><label for="aicte-number">AICTE Approval No.</label><input id="aicte-number" placeholder="Enter AICTE approval number" /></div><div class="field"><label for="institution-address">Address</label><textarea id="institution-address" rows="3" placeholder="Enter institution address"></textarea></div><div class="form-grid two-col"><div class="field"><label for="contact-email">Contact Email</label><input id="contact-email" type="email" placeholder="Enter contact email" /></div><div class="field"><label for="contact-number">Contact Number</label><input id="contact-number" type="tel" placeholder="Enter contact number" /></div></div><div class="form-grid two-col"><div class="field"><label for="current-year">Academic Year (Current)</label><select id="current-year"><option>2026</option><option>2025</option><option>2024</option></select></div><div class="field"><label for="approved-intake">Approved Intake (Total)</label><input id="approved-intake" type="number" min="0" placeholder="Enter approved intake" /></div></div></div><div class="logo-settings"><div class="logo-placeholder"><span>✦</span><small>Institution Logo</small></div><button type="button" class="outline" id="upload-logo">＋ Choose Logo</button><input type="file" id="logo-file" accept="image/*" hidden /><small>Preferred size: 200×200px (PNG/JPG)</small></div></div><div class="settings-actions"><button type="submit" class="primary">Save Changes</button></div></form></div><div class="settings-content hidden" id="settings-users"><div class="settings-placeholder"><span>♙</span><h3>User Management</h3><p>Manage institution users and assign roles after connecting the authentication backend.</p></div></div><div class="settings-content hidden" id="settings-upload"><div class="settings-placeholder"><span>⇧</span><h3>Data &amp; Upload</h3><p>Bulk CSV upload will be connected to the backend. No student records are preloaded in this frontend.</p><label class="outline upload-label" for="csv-upload">Choose CSV file</label><input id="csv-upload" type="file" accept=".csv,text/csv" hidden /><small id="csv-name"></small></div></div><div class="settings-content hidden" id="settings-notifications"><div class="preference-list"><label><span><strong>Validation alerts</strong><small>Notify users when records need correction.</small></span><input type="checkbox" checked /></label><label><span><strong>Data upload updates</strong><small>Notify users when a data import finishes.</small></span><input type="checkbox" checked /></label><label><span><strong>Security alerts</strong><small>Notify administrators about account activity.</small></span><input type="checkbox" checked /></label></div></div><div class="settings-content hidden" id="settings-security"><div class="settings-placeholder"><span>♢</span><h3>Security &amp; Access</h3><p>Role-based permissions, audit trails, and secure API credentials should be enforced by the backend.</p></div></div></div></section>
+        </div>
+      </main>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="confirm-modal" class="modal-backdrop hidden"><div class="modal"><button class="modal-close" id="modal-close">×</button><h2 id="modal-title">Notice</h2><p id="modal-message"></p><button class="primary" id="modal-ok">Okay</button></div></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
