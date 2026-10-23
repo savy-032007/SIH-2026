@@ -1,0 +1,90 @@
+name: apaar
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-apaar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apaar_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-apaar}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-test-db.sh:/docker-entrypoint-initdb.d/10-init-test-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-apaar} -d ${POSTGRES_DB:-apaar}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mock-abc:
+    build:
+      context: ./services/mock-abc
+    environment:
+      MOCK_ABC_DATASET: ${MOCK_ABC_DATASET:-/data/seed/abc_registry.json}
+      MOCK_ABC_CHAOS: ${MOCK_ABC_CHAOS:-1}
+      ABC_CLIENT_ID: ${ABC_CLIENT_ID:-aicte-apaar-dev}
+      ABC_CLIENT_SECRET: ${ABC_CLIENT_SECRET:-dev-only-abc-secret}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${MOCK_ABC_PORT:-9001}:9001"
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:9001/health').read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: ./services/api
+    env_file:
+      - .env
+    environment:
+      # Override the host-oriented defaults from .env with in-network names.
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://apaar:apaar_dev_password@postgres:5432/apaar}
+      ABC_BASE_URL: ${ABC_BASE_URL:-http://mock-abc:9001}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./services/api:/srv/api
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-abc:
+        condition: service_started
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      --reload-dir /srv/api/app
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/health').read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  web:
+    build:
+      context: ./apps/web
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ./apps/web:/srv/web
+      - web_node_modules:/srv/web/node_modules
+      - web_next:/srv/web/.next
+    depends_on:
+      api:
+        condition: service_started
+    command: npm run dev
+
+volumes:
+  pgdata:
+  web_node_modules:
+  web_next:

@@ -1,0 +1,25 @@
+{
+  "academic_year": "2025-26",
+  "nri_cap_pct": 0.05,
+  "supernumerary_pct": {
+    "UG":      {"ENGINEERING": 0.15, "MANAGEMENT": 0.15, "DESIGN": 0.15, "OTHER_TECH": 0.15},
+    "DIPLOMA": {"ENGINEERING": 0.15, "MANAGEMENT": 0.15, "DESIGN": 0.15, "OTHER_TECH": 0.15},
+    "PG":      {"ENGINEERING": 0.15, "MANAGEMENT": 0.15, "DESIGN": 0.15, "OTHER_TECH": 0.15}
+  },
+  "ciwgc_fraction_of_supernumerary": 0.3333,
+  "ciwgc_vacancy_transfer": true,
+  "oci_foreign_cutoff_date": "2021-03-04",
+  "near_cap_threshold": 0.95,
+  "age_min": 15,
+  "age_max": 60,
+  "name_match": {"warn_below": 90, "error_below": 80},
+  "risk_weights": {
+    "CRITICAL": 25,
+    "HIGH": 10,
+    "MEDIUM": 4,
+    "LOW": 1,
+    "over_intake_year": 8,
+    "unverified_pct": 0.3,
+    "iforest": 0.3
+  }
+}

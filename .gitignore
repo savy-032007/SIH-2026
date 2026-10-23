@@ -1,0 +1,38 @@
+# Secrets and local config
+.env
+.env.local
+*.pem
+*.key
+
+# Generated synthetic dataset (regenerate with `make seed`)
+/data/seed/
+services/api/data/seed/
+
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker local volumes
+.docker/

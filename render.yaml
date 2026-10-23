@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: apaar-api
+    runtime: docker
+    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: ./services/api
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apaar-postgres
+          property: connectionString
+      - key: WEB_ORIGIN
+        sync: false
+      - key: FIELD_MASTER_KEY
+        value: ZGV2LW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcyEhISE=
+      - key: HASH_PEPPER
+        value: live-production-hash-pepper-key-salt-2026
+      - key: JWT_SECRET
+        value: aicte-apaar-production-jwt-secret-token-key
+
+databases:
+  - name: apaar-postgres
+    databaseName: apaar
+    user: apaar
+    plan: free
