@@ -249,11 +249,11 @@ def get_dashboard() -> DashboardResponse:
     )
 
     enrolment_trend = [
-        EnrolmentTrendPoint(year="2021", actual=395, approved=600),
         EnrolmentTrendPoint(year="2022", actual=450, approved=600),
         EnrolmentTrendPoint(year="2023", actual=485, approved=600),
         EnrolmentTrendPoint(year="2024", actual=520, approved=600),
-        EnrolmentTrendPoint(year="2025", actual=actual_enrolment, approved=600),
+        EnrolmentTrendPoint(year="2025", actual=565, approved=600),
+        EnrolmentTrendPoint(year="2026", actual=actual_enrolment, approved=600),
     ]
 
     category_distribution = [
