@@ -540,12 +540,21 @@ async function loadValidationData() {
     }
   } catch {}
 
-  // Fallback
+  // Fallback: Use full institutional enrolled batch (585) or connected dataset
+  const total = (state.students && state.students.length > 20)
+    ? state.students.length
+    : (state.dashboard && state.dashboard.actual_enrolment ? state.dashboard.actual_enrolment : 585);
+
+  const correctionRecords = 11;
+  const flaggedRecords = 3;
+  const totalIssues = correctionRecords + flaggedRecords; // 14 issues breakdown
+  const validRecords = Math.max(0, total - totalIssues);  // 585 - 14 = 571 (guaranteed non-negative)
+
   renderValidationUI({
-    total_records: state.students.length || 582,
-    valid_records: (state.students.length || 582) - 14,
-    correction_records: 11,
-    flagged_records: 3,
+    total_records: total,
+    valid_records: validRecords,
+    correction_records: correctionRecords,
+    flagged_records: flaggedRecords,
     issues: [
       { type: 'Duplicate APAAR ID', count: 2, details: 'APAAR ID active in multiple submissions', status: 'Review' },
       { type: 'Invalid / Missing APAAR ID', count: 5, details: 'Missing standard 12-digit format checksum', status: 'Review' },
@@ -556,10 +565,15 @@ async function loadValidationData() {
 }
 
 function renderValidationUI(data) {
-  if ($('#val-total')) $('#val-total').textContent = data.total_records || state.students.length;
-  if ($('#val-valid')) $('#val-valid').textContent = data.valid_records || 568;
-  if ($('#val-correction')) $('#val-correction').textContent = data.correction_records || 11;
-  if ($('#val-flagged')) $('#val-flagged').textContent = data.flagged_records || 3;
+  const total = Number(data.total_records !== undefined ? data.total_records : 585);
+  const correction = Number(data.correction_records !== undefined ? data.correction_records : 11);
+  const flagged = Number(data.flagged_records !== undefined ? data.flagged_records : 3);
+  const valid = Math.max(0, Number(data.valid_records !== undefined ? data.valid_records : (total - (correction + flagged))));
+
+  if ($('#val-total')) $('#val-total').textContent = total.toLocaleString();
+  if ($('#val-valid')) $('#val-valid').textContent = valid.toLocaleString();
+  if ($('#val-correction')) $('#val-correction').textContent = correction.toLocaleString();
+  if ($('#val-flagged')) $('#val-flagged').textContent = flagged.toLocaleString();
 
   const issuesBody = $('#issues-body');
   if (issuesBody && data.issues) {
