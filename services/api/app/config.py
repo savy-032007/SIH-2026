@@ -42,9 +42,10 @@ class Settings(BaseSettings):
     abc_timeout_seconds: float = 5.0
     abc_max_attempts: int = 3
 
-    digilocker_impl: Literal["mock", "apisetu_sandbox"] = "mock"
-    digilocker_client_id: str = ""
-    digilocker_client_secret: str = ""
+    digilocker_impl: Literal["mock", "apisetu_sandbox"] = "apisetu_sandbox"
+    digilocker_client_id: str = "in.gov.sandbox"
+    digilocker_client_secret: str = "demokey123456ABCD789"
+    digilocker_api_key: str = "demokey123456ABCD789"
     digilocker_base_url: str = "https://sandbox.api-setu.in"
 
     # --- paths ------------------------------------------------------------

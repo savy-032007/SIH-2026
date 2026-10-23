@@ -97,7 +97,12 @@ class CreateStudentRequest(BaseModel):
 class VerifyApaarRequest(BaseModel):
     apaar_id: str
     name: str | None = None
+    student_name: str | None = None
     dob: str | None = None
+    gender: str | None = None
+    admission_year: str | None = None
+    mobile: str | None = None
+    email: str | None = None
 
 
 class VerifyApaarResponse(BaseModel):
@@ -107,6 +112,9 @@ class VerifyApaarResponse(BaseModel):
     masked_name: str | None = None
     status: str
     message: str
+    doc_type: str | None = None
+    issuer: str | None = None
+    sha256: str | None = None
 
 
 # --------------------------------------------------------------------------- #

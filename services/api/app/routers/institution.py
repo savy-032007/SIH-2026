@@ -36,6 +36,8 @@ from app.schemas.institution import (
     VerifyApaarRequest,
     VerifyApaarResponse,
 )
+from app.integrations.digilocker import DigiLockerProvider
+from app.integrations.factory import get_digilocker
 
 router = APIRouter(prefix="/institution", tags=["institution"])
 
@@ -429,8 +431,11 @@ def delete_student(student_id: str) -> None:
 
 
 @router.post("/students/verify-apaar", response_model=VerifyApaarResponse, summary="Verify APAAR ID")
-def verify_apaar(payload: VerifyApaarRequest) -> VerifyApaarResponse:
-    """Simulates real-time verification with the APAAR/ABC registry adapter."""
+def verify_apaar(
+    payload: VerifyApaarRequest,
+    digilocker: DigiLockerProvider = Depends(get_digilocker),
+) -> VerifyApaarResponse:
+    """Verifies APAAR ID against the active DigiLocker / API Setu ABC ID card adapter."""
     apaar_clean = payload.apaar_id.replace(" ", "").replace("-", "")
 
     if not re.match(r"^\d{12}$", apaar_clean):
@@ -442,21 +447,38 @@ def verify_apaar(payload: VerifyApaarRequest) -> VerifyApaarResponse:
             message="APAAR ID must be exactly 12 numeric digits.",
         )
 
+    student_name = payload.name or payload.student_name
+
+    # Query the DigiLocker adapter (API Setu Sandbox or Mock)
+    doc = digilocker.verify_apaar(
+        apaar_id=apaar_clean,
+        name=student_name,
+        dob=payload.dob,
+        gender=payload.gender,
+        admission_year=payload.admission_year,
+        mobile=payload.mobile,
+        email=payload.email,
+    )
+
     # Mask name if provided or generate realistic masked name
     masked = None
-    if payload.name:
-        parts = payload.name.split()
+    if student_name:
+        parts = student_name.split()
         masked = " ".join([p[0] + "*" * (len(p) - 1) if len(p) > 1 else p for p in parts])
     else:
         masked = "A**** S*****"
 
+    hash_preview = f" [Hash: {doc.sha256[:8]}]" if doc.sha256 else ""
     return VerifyApaarResponse(
         apaar_id=apaar_clean,
         valid=True,
         exists=True,
         masked_name=masked,
         status="ACTIVE",
-        message="APAAR ID verified successfully against Academic Bank of Credits registry.",
+        message=f"APAAR ID verified via {doc.issuer}{hash_preview}.",
+        doc_type=doc.doc_type,
+        issuer=doc.issuer,
+        sha256=doc.sha256,
     )
 
 
