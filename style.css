@@ -19,3 +19,554 @@
 @media(max-width:1100px){.sidebar{width:175px;flex-basis:175px}.page-content{padding:22px 18px}.topbar{padding:0 18px}.dashboard-grid{grid-template-columns:minmax(0,1.2fr) minmax(230px,.8fr)}.legend{display:none}.stat-card{padding:11px;gap:8px}.stat-icon{width:31px;height:31px;flex-basis:31px}.stat-card strong{font-size:20px}.settings-grid{grid-template-columns:minmax(0,1fr) 170px;gap:18px}.filter-row{flex-wrap:wrap}.filter-row select{min-width:calc(33% - 8px)}}
 @media(max-width:780px){.login-screen{flex-direction:column;gap:18px;padding:20px}.login-art{width:100%;max-width:480px;height:330px;min-height:330px;padding-top:24px}.institution-seal{width:55px;height:55px;font-size:9px}.institution-seal b{font-size:14px;line-height:14px}.brand-word{font-size:28px;margin-top:5px}.login-art h1{font-size:14px;line-height:1.5}.login-subtitle{margin-top:12px}.trust-row{margin-top:18px}.book-stack{transform:scale(.7) skewY(-10deg);transform-origin:bottom right;bottom:12px;right:10px}.login-card{width:100%;max-width:480px;padding:22px}.workspace{display:block}.sidebar{width:100%;min-height:0;height:auto;position:sticky;top:0;z-index:10}.side-brand{height:52px;padding:0 16px}.side-nav{flex-direction:row;overflow-x:auto;padding:7px;gap:5px}.nav-item{flex:0 0 auto;padding:9px 11px;font-size:10px}.nav-item span{font-size:14px}.sidebar-bottom{display:none}.topbar{height:auto;min-height:60px;padding:10px 14px}.institution-mark strong{font-size:10px}.institution-mark small{font-size:8px}.topbar-actions{gap:7px}.user-profile>div:last-child{display:none}.user-profile{gap:0}.topbar-actions>select{min-width:62px}.page-content{padding:19px 13px 25px}.page-heading{align-items:flex-start}.page-heading h1{font-size:20px}.page-heading p{line-height:1.5}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stat-card{min-height:72px}.dashboard-grid{grid-template-columns:1fr}.activity-panel,.quick-panel{grid-column:auto;grid-row:auto}.chart-empty{height:190px}.distribution-panel{padding-bottom:8px}.quick-panel{padding-bottom:12px}.report-grid{grid-template-columns:1fr}.report-card{min-height:160px}.settings-grid{grid-template-columns:1fr}.logo-settings{align-items:flex-start;flex-direction:row;flex-wrap:wrap}.logo-placeholder{width:90px;height:90px}.logo-placeholder span{width:40px;height:40px}.settings-content{padding:15px}.settings-tabs{padding:0 10px;gap:9px}.settings-tab{padding:13px 4px 10px}.two-col,.three-col,.four-col{grid-template-columns:1fr 1fr}.short-row{max-width:100%}.issue-content{grid-template-columns:1fr}.issue-chart{border-left:0;border-top:1px solid #edf2f8;padding-top:15px}.heading-actions{flex-wrap:wrap;justify-content:flex-end}.filter-row select{min-width:calc(50% - 5px)}.filter-row .search-btn{flex:1}.student-form-panel{padding:0 14px 15px}.form-section{padding:16px 0}.student-table-wrap table{min-width:800px}.tabs{padding:0 6px}.tab{padding:13px 9px 11px}}
 @media(max-width:440px){.institution-mark .small-seal{display:none}.topbar{gap:8px}.topbar-actions{gap:3px}.icon-btn{width:24px}.page-heading{gap:8px}.page-heading .outline,.page-heading .primary{padding:0 9px;font-size:10px}.page-heading h1{font-size:18px}.stat-card{gap:7px;padding:9px}.stat-card small{font-size:9px}.stat-card strong{font-size:18px}.stat-icon{width:28px;height:28px;flex-basis:28px;font-size:16px}.two-col,.three-col,.four-col{grid-template-columns:1fr}.form-actions button{flex:1}.heading-actions select{max-width:135px}.heading-actions .primary{min-width:70px}.login-art{height:315px;min-height:315px}.trust-row{width:95%}}
+
+
+
+/* ==============================================================================
+   USABILITY AUDIT SYSTEMIC IMPROVEMENTS & ACCESSIBILITY REFINEMENTS
+   ============================================================================== */
+
+:root {
+  /* Design Tokens: Consolidated Type Scale (Issue 6) */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+
+  /* Design Tokens: Unified Semantic Color Palette (Issue 7) */
+  --text-heading: #0f2744;
+  --text-body: #244164;
+  --text-muted: #5e738f;
+  --text-subtle: #8496ad;
+  --color-primary: #0965f5;
+  --color-primary-hover: #0054d9;
+  --color-success: #0d9658;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-border: #dce7f5;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f5f9ff;
+
+  /* Design Tokens: Unified Border Radii (Issue 8) */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+}
+
+/* Base Typography & Hierarchy (Issue 9, 10, 11, 12) */
+.page-heading h1 {
+  font-size: var(--text-2xl);
+  color: var(--text-heading);
+}
+
+.page-heading p {
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.panel-heading .panel-title,
+.panel-heading h2 {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+/* Button System: Unified into 4 Core Styles (Issue 2) */
+.primary,
+.outline,
+.text-btn,
+.icon-btn {
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.primary {
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: var(--text-base);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 2px 6px rgba(9, 101, 245, 0.2);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.outline {
+  background: #ffffff;
+  border: 1px solid #cbdcf2;
+  color: #1754a4;
+  border-radius: var(--radius-md);
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: var(--text-base);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.outline:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  border-color: #a9c6ee;
+}
+
+.text-btn {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.text-btn:hover {
+  background: #f0f6ff;
+}
+
+.icon-btn {
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: #4b627f;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: #eef5fc;
+  color: var(--color-primary);
+}
+
+.small {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: var(--text-sm);
+}
+
+/* Legend Typography (Issue 3) */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  margin-left: 6px;
+}
+
+/* Line Chart X-Axis Alignment (Issue 4) */
+.chart-x-labels {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+/* Donut Chart & Category Distribution Legend (Issue 1, 10, 13) */
+.distribution-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.distribution-body {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 18px 18px;
+  flex: 1;
+}
+
+.distribution-donut-wrap {
+  flex: 0 0 115px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.category-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  padding: 0;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+  color: var(--text-body);
+}
+
+.category-item i {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.cat-label {
+  color: var(--text-muted);
+  min-width: 58px;
+  font-size: var(--text-sm);
+}
+
+.cat-value {
+  color: var(--text-heading);
+  font-weight: 700;
+  font-size: var(--text-sm);
+}
+
+.cat-pct {
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+  margin-left: auto;
+}
+
+/* Activity Table Typography & Full Horizontal Distribution (Issue 11, 15) */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--text-sm);
+}
+
+th {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-heading);
+  padding: 12px 10px;
+}
+
+td {
+  font-size: var(--text-sm);
+  color: var(--text-body);
+  padding: 11px 10px;
+}
+
+.activity-panel table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.activity-panel th:first-child,
+.activity-panel td:first-child {
+  width: 36px;
+  text-align: center;
+  padding-left: 14px;
+}
+
+.activity-panel th:nth-child(2),
+.activity-panel td:nth-child(2) {
+  width: 25%;
+  font-weight: 600;
+}
+
+.activity-panel th:nth-child(3),
+.activity-panel td:nth-child(3) {
+  width: auto;
+}
+
+.activity-panel th:last-child,
+.activity-panel td:last-child {
+  width: 165px;
+  text-align: right;
+  padding-right: 16px;
+  color: var(--text-muted);
+}
+
+/* Quick Actions Spacing, Alignment & Proportions (Issue 5, 14, 17) */
+.quick-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px 16px;
+  gap: 8px;
+}
+
+.quick-action {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 38px;
+  min-height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  color: #1458a9;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-action:hover {
+  background: var(--color-surface-hover);
+  border-color: #bcd7f9;
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.quick-action svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: #1665cb;
+  transition: stroke 0.15s ease;
+}
+
+.quick-action:hover svg {
+  stroke: var(--color-primary);
+}
+
+/* Academic Year Context Placement in Dashboard Header (Issue 16) */
+.academic-year-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.year-selector-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.academic-year-wrap select {
+  height: 32px;
+  border: 1px solid #d7e4f4;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  color: var(--text-body);
+  padding: 0 10px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Sidebar Logout Button Visual Weight (Issue 18) */
+.sidebar-bottom {
+  padding: 16px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+#logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  height: 34px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-md);
+  color: #d7e4f5;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+#logout-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ffffff;
+}
+
+#logout-btn svg {
+  stroke: currentColor;
+}
+
+/* Topbar Notification Center & Bell Icon (Screenshot / Extra Feature) */
+.notifications-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 330px;
+  background: #ffffff;
+  border: 1px solid #dce7f5;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 36px rgba(15, 39, 68, 0.15);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: notifSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes notifSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf2f8;
+  background: #fbfdff;
+}
+
+.notif-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notif-header-title strong {
+  font-size: var(--text-base);
+  color: var(--text-heading);
+}
+
+.notif-count-pill {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  background: #e6f0fc;
+  color: #0b60cb;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.notif-mark-read {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notif-mark-read:hover {
+  text-decoration: underline;
+}
+
+.notif-list {
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f1f5fa;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: #f8fbfe;
+}
+
+.notif-item.unread {
+  background: #f0f7ff;
+}
+
+.notif-item.unread:hover {
+  background: #eaf3fe;
+}
+
+.notif-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.notif-item:not(.unread) .notif-dot {
+  background: transparent;
+}
+
+.notif-text p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-body);
+}
+
+.notif-text small {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.notif-footer {
+  padding: 10px 14px;
+  border-top: 1px solid #edf2f8;
+  background: #fcfdfe;
+  text-align: center;
+}
+
+.notif-footer .text-btn {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+}

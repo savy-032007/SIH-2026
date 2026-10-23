@@ -339,29 +339,39 @@ function renderCategoryDonut(data, enrolment = 0) {
            ((data.category_distribution.find(c => c.category === 'Foreign National') || {}).count || 8)
   } : { General: 280, OBC: 195, 'SC / ST': 87, Other: 23 });
 
-  const totalCat = (catData.General || 0) + (catData.OBC || 0) + (catData['SC / ST'] || 0) + (catData.Other || 0) || enrolment || 1;
-  const p1 = Math.round(((catData.General || 0) / totalCat) * 100);
-  const p2 = p1 + Math.round(((catData.OBC || 0) / totalCat) * 100);
-  const p3 = p2 + Math.round(((catData['SC / ST'] || 0) / totalCat) * 100);
+  // Issue 1 Fix: Aggregate dynamically from category distribution to prevent summary contradiction
+  const catSum = (catData.General || 0) + (catData.OBC || 0) + (catData['SC / ST'] || 0) + (catData.Other || 0);
+  const displayTotal = catSum > 0 ? catSum : (enrolment || 0);
+
+  const p1 = Math.round(((catData.General || 0) / (displayTotal || 1)) * 100);
+  const p2 = p1 + Math.round(((catData.OBC || 0) / (displayTotal || 1)) * 100);
+  const p3 = p2 + Math.round(((catData['SC / ST'] || 0) / (displayTotal || 1)) * 100);
 
   const donut = $('.empty-donut');
   if (donut) {
-    if (enrolment > 0) {
+    if (displayTotal > 0) {
       donut.style.background = `conic-gradient(#1478ff 0% ${p1}%, #0ebd9b ${p1}% ${p2}%, #f5b000 ${p2}% ${p3}%, #a66ce5 ${p3}% 100%)`;
     } else {
       donut.style.background = 'conic-gradient(#e7eff8 0 100%)';
     }
   }
 
-  const donutSpan = $('.distribution-empty .empty-donut span');
+  const donutSpan = $('.distribution-panel .empty-donut span') || $('.empty-donut span');
   if (donutSpan) {
-    donutSpan.innerHTML = `${enrolment.toLocaleString()}<small>Total Students</small>`;
+    donutSpan.innerHTML = `${displayTotal.toLocaleString()}<small>Total Students</small>`;
   }
 
-  const distP = $('.distribution-empty p');
-  if (distP) {
-    distP.textContent = `General: ${catData.General || 0} | OBC: ${catData.OBC || 0} | SC/ST: ${catData['SC / ST'] || 0} | Other: ${catData.Other || 0}`;
-  }
+  // Issue 13 Fix: Unified category legend with counts & percentages directly adjacent to swatches
+  const calcPct = (val) => displayTotal > 0 ? `(${((val / displayTotal) * 100).toFixed(1)}%)` : '(0%)';
+  if ($('#cat-gen')) $('#cat-gen').textContent = (catData.General || 0).toLocaleString();
+  if ($('#cat-obc')) $('#cat-obc').textContent = (catData.OBC || 0).toLocaleString();
+  if ($('#cat-scst')) $('#cat-scst').textContent = (catData['SC / ST'] || 0).toLocaleString();
+  if ($('#cat-oth')) $('#cat-oth').textContent = (catData.Other || 0).toLocaleString();
+
+  const gEl = $('#cat-gen'); if (gEl && gEl.nextElementSibling) gEl.nextElementSibling.textContent = calcPct(catData.General || 0);
+  const oEl = $('#cat-obc'); if (oEl && oEl.nextElementSibling) oEl.nextElementSibling.textContent = calcPct(catData.OBC || 0);
+  const sEl = $('#cat-scst'); if (sEl && sEl.nextElementSibling) sEl.nextElementSibling.textContent = calcPct(catData['SC / ST'] || 0);
+  const otEl = $('#cat-oth'); if (otEl && otEl.nextElementSibling) otEl.nextElementSibling.textContent = calcPct(catData.Other || 0);
 }
 
 function renderActivityTable() {
@@ -873,7 +883,58 @@ function exportCSV(filename, rows) {
 // ==============================================================================
 // 7. Event Listeners & Bootstrapping
 // ==============================================================================
+
+// Setup Interactive Notifications Dropdown
+function setupNotifications() {
+  const notifBtn = $('#notifications-btn');
+  const notifDropdown = $('#notifications-dropdown');
+  const markReadBtn = $('#notif-mark-read');
+  const notifBadge = $('#notif-badge');
+  const notifCount = $('#notif-count');
+
+  if (notifBtn && notifDropdown) {
+    notifBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = !notifDropdown.classList.contains('hidden');
+      if (isOpen) {
+        notifDropdown.classList.add('hidden');
+        notifBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        notifDropdown.classList.remove('hidden');
+        notifBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+        notifDropdown.classList.add('hidden');
+        notifBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !notifDropdown.classList.contains('hidden')) {
+        notifDropdown.classList.add('hidden');
+        notifBtn.setAttribute('aria-expanded', 'false');
+        notifBtn.focus();
+      }
+    });
+  }
+
+  if (markReadBtn && notifDropdown) {
+    markReadBtn.addEventListener('click', () => {
+      $$('.notif-item.unread', notifDropdown).forEach(item => {
+        item.classList.remove('unread');
+      });
+      if (notifBadge) notifBadge.style.display = 'none';
+      if (notifCount) notifCount.textContent = '0 new';
+      toast('All notifications marked as read.');
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  setupNotifications();
   // Login Form
   const loginForm = $('#login-form');
   if (loginForm) {
