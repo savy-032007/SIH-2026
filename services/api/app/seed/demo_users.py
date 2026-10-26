@@ -36,6 +36,16 @@ class DemoUser:
 #: follow the same college from upload to national map.
 DEMO_USERS: tuple[DemoUser, ...] = (
     DemoUser(
+        email="admin@aicte.gov.in",
+        role=Role.AICTE_SUPER_ADMIN,
+        purpose="AICTE Admin login",
+    ),
+    DemoUser(
+        email="verifier@tcs.com",
+        role=Role.VERIFIER,
+        purpose="Verifier / Employer login",
+    ),
+    DemoUser(
         email="super.admin@aicte.example.com",
         role=Role.AICTE_SUPER_ADMIN,
         purpose="national dashboard, rules, users (demo steps 3-8)",

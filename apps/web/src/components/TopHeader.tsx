@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BellIcon } from "./icons";
+import { clearAccessToken } from "../lib/api";
 
 interface TopHeaderProps {
   institutionName?: string;
@@ -23,6 +25,49 @@ export function TopHeader({
 }: TopHeaderProps) {
   const [year, setYear] = useState(selectedYear);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [displayName, setDisplayName] = useState(adminName);
+  const [displayRole, setDisplayRole] = useState(adminRole);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("apaar_user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.name) setDisplayName(parsed.name);
+        if (parsed.role) setDisplayRole(parsed.role);
+      }
+    } catch {}
+  }, []);
+
+
+  useEffect(() => {
+    if (!showProfileMenu) return;
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowProfileMenu(false);
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [showProfileMenu]);
+
+  const handleLogout = () => {
+    clearAccessToken();
+    setShowProfileMenu(false);
+    router.replace("/");
+  };
 
   const handleYearSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
@@ -98,25 +143,59 @@ export function TopHeader({
         </div>
 
         {/* User Profile Card */}
-        <Link
-          href="/settings"
-          className="flex items-center gap-2.5 pl-2 border-l border-slate-200 group"
-        >
-          {/* Avatar circle matching Priya Verma */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-400 p-0.5 shadow-2xs">
-            <div className="w-full h-full rounded-full bg-white flex items-center justify-center font-bold text-xs text-rose-600 overflow-hidden">
-              PV
+        <div className="relative pl-2 border-l border-slate-200" ref={profileMenuRef}>
+          <button
+            type="button"
+            onClick={() => setShowProfileMenu((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={showProfileMenu}
+            aria-label={`Open profile menu for ${displayName}`}
+            className="flex items-center gap-2.5 rounded-lg text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            <span className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-400 p-0.5 shadow-2xs">
+              <span className="w-full h-full rounded-full bg-white flex items-center justify-center font-bold text-xs text-rose-600 overflow-hidden">
+                {displayName.split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
+            </span>
+            <span>
+              <span className="block text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                {displayName}
+              </span>
+              <span className="block text-[10px] text-slate-500 leading-none">
+                {displayRole}
+              </span>
+            </span>
+          </button>
+
+          {showProfileMenu && (
+            <div
+              role="menu"
+              aria-label="Profile menu"
+              className="absolute right-0 mt-3 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-black/5 z-50"
+            >
+              <div className="px-3 py-2 border-b border-slate-100">
+                <p className="text-xs font-semibold text-slate-800">{displayName}</p>
+                <p className="text-[11px] text-slate-500">{displayRole}</p>
+              </div>
+              <Link
+                href="/settings"
+                role="menuitem"
+                onClick={() => setShowProfileMenu(false)}
+                className="mt-1 block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                Account settings
+              </Link>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleLogout}
+                className="mt-0.5 w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+              >
+                Log out
+              </button>
             </div>
-          </div>
-          <div className="text-left">
-            <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
-              {displayName}
-            </div>
-            <div className="text-[10px] text-slate-500 leading-none">
-              {displayRole}
-            </div>
-          </div>
-        </Link>
+          )}
+        </div>
       </div>
     </header>
   );

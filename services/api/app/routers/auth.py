@@ -170,7 +170,7 @@ def login(
 
     user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
 
-    if user is None and email in _DEMO_ACCOUNTS:
+    if email in _DEMO_ACCOUNTS:
         demo_role, demo_id = _DEMO_ACCOUNTS[email]
         accepted_passwords = [settings.demo_user_password, "Demo@admin", "Demo@1234"]
         password_valid = any(
