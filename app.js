@@ -981,8 +981,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('[Auth] Remote login fallback active.');
       }
 
+      const cfg = demoRoleConfig[role] || { name: email.split('@')[0] || 'User', email, password };
       state.currentUser = {
-        name: email.split('@')[0] || 'Priya Verma',
+        name: cfg.name,
         email: email,
         role: role
       };
@@ -997,6 +998,23 @@ document.addEventListener('DOMContentLoaded', () => {
       toast(`Welcome, ${state.currentUser.name}!`);
     });
   }
+
+    // Auto-fill demo credentials on role change
+  const demoRoleConfig = {
+    'Institution Admin': { email: 'admin@xyzcollege.ac.in', name: 'Priya Verma', password: 'Demo@admin' },
+    'AICTE Admin': { email: 'admin@aicte.gov.in', name: 'Dr. Ramesh Unnikrishnan', password: 'Demo@admin' },
+    'Verifier / Employer': { email: 'verifier@tcs.com', name: 'Vikram Malhotra', password: 'Demo@admin' }
+  };
+
+  $('input[name="role"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const cfg = demoRoleConfig[radio.value];
+      if (cfg) {
+        if ($('#login-email')) $('#login-email').value = cfg.email;
+        if ($('#login-password')) $('#login-password').value = cfg.password;
+      }
+    });
+  });
 
   // Toggle Password Visibility
   const togglePass = $('#toggle-password');

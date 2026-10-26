@@ -1,0 +1,8 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "apaar-setu-api"
+region = "ap-southeast-2"
+resolve_s3 = true
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true

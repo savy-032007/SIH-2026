@@ -3,41 +3,116 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AicteEmblem, BooksIllustration } from "@/components/icons";
+import { API_BASE, saveAccessToken } from "@/lib/api";
+
+type DemoRole = "INST_ADMIN" | "AICTE_ADMIN" | "VERIFIER";
+
+interface DemoAccount {
+  email: string;
+  password: string;
+  roleName: string;
+  userName: string;
+  redirect: string;
+}
+
+const DEMO_ACCOUNTS: Record<DemoRole, DemoAccount> = {
+  INST_ADMIN: {
+    email: "admin@xyzcollege.ac.in",
+    password: "Demo@admin",
+    roleName: "Institution Admin",
+    userName: "Priya Verma",
+    redirect: "/dashboard",
+  },
+  AICTE_ADMIN: {
+    email: "admin@aicte.gov.in",
+    password: "Demo@admin",
+    roleName: "AICTE Admin",
+    userName: "Dr. Ramesh Unnikrishnan",
+    redirect: "/dashboard",
+  },
+  VERIFIER: {
+    email: "verifier@tcs.com",
+    password: "Demo@admin",
+    roleName: "Verifier / Employer",
+    userName: "Vikram Malhotra",
+    redirect: "/students",
+  },
+};
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@xyzcollege.ac.in");
-  const [password, setPassword] = useState("Demo@1234");
+  const [selectedRole, setSelectedRole] = useState<DemoRole>("INST_ADMIN");
+  const [email, setEmail] = useState(DEMO_ACCOUNTS.INST_ADMIN.email);
+  const [password, setPassword] = useState(DEMO_ACCOUNTS.INST_ADMIN.password);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("INST_ADMIN");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const authenticate = async (loginEmail: string, loginPassword: string, role: DemoRole) => {
     setLoading(true);
     setError(null);
 
+    const demoConfig = DEMO_ACCOUNTS[role] || DEMO_ACCOUNTS.INST_ADMIN;
+
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-      const res = await fetch(`${apiBase}/api/v1/auth/login`, {
+      const res = await fetch(API_BASE + "/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role: selectedRole }),
+        body: JSON.stringify({ email: loginEmail, password: loginPassword, role }),
       });
-
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        // If login failed, show friendly message or allow direct demo transition
-        console.warn("API login endpoint returned non-200, continuing to demo dashboard");
+        setError(data?.detail || "Email or password is incorrect.");
+        return;
       }
-      // Successful or demo bypass: route directly to Institution Dashboard
-      router.push("/dashboard");
+      if (data?.mfa_required) {
+        setError("This account requires multi-factor authentication, which this demo sign-in does not support yet.");
+        return;
+      }
+      if (typeof data?.access_token !== "string") {
+        throw new Error("The API returned an invalid login response.");
+      }
+
+      saveAccessToken(data.access_token);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "apaar_user",
+          JSON.stringify({
+            name: demoConfig.userName,
+            email: loginEmail,
+            role: demoConfig.roleName,
+          })
+        );
+      }
+      router.push(demoConfig.redirect);
     } catch {
-      // Offline fallback: seamless experience
-      router.push("/dashboard");
+      setError("Could not reach the API. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    void authenticate(email, password, selectedRole);
+  };
+
+  const handleRoleChange = (role: DemoRole) => {
+    setSelectedRole(role);
+    const demo = DEMO_ACCOUNTS[role];
+    if (demo) {
+      setEmail(demo.email);
+      setPassword(demo.password);
+    }
+    setError(null);
+  };
+
+  const handleQuickDemo = (role: DemoRole) => {
+    const demo = DEMO_ACCOUNTS[role];
+    setSelectedRole(role);
+    setEmail(demo.email);
+    setPassword(demo.password);
+    void authenticate(demo.email, demo.password, role);
   };
 
   return (
@@ -82,14 +157,13 @@ export default function LoginPage() {
                     <path d="m9 12 2 2 4-4" />
                   </svg>
                 </div>
-                <span>Verified</span>
+                <span>Verified Records</span>
               </div>
 
               <div className="flex flex-col items-center gap-1">
-                <div className="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-sky-700">
+                <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                    <circle cx="12" cy="12" r="3" />
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                   </svg>
                 </div>
                 <span>Transparent</span>
@@ -97,25 +171,25 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* 3D Books with Graduation Cap Illustration */}
-          <div className="mt-8 flex justify-center">
-            <BooksIllustration className="w-48 h-36" />
+          {/* Bottom Illustration */}
+          <div className="mt-8">
+            <BooksIllustration className="w-44 h-auto text-blue-300 drop-shadow-sm opacity-90" />
           </div>
         </div>
 
-        {/* Right Login Card Panel */}
+        {/* Right Form Panel */}
         <div className="md:col-span-6 p-8 md:p-12 flex flex-col justify-center">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h2 className="text-xl font-bold text-slate-800 tracking-tight">
               Welcome Back
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Login to access your institutional dashboard
+              Login to access institutional verification and data controls
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-2.5 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs">
+            <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
               {error}
             </div>
           )}
@@ -123,49 +197,54 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email Field */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Email Address
+              <label
+                htmlFor="email"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Email address
               </label>
               <input
+                id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@xyzcollege.ac.in"
-                className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-2xs"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-2xs pr-10"
+                  placeholder="Enter password"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                 >
                   {showPassword ? (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                      <line x1="2" x2="22" y1="2" y2="22" />
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                      <circle cx="12" cy="12" r="3" />
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   )}
                 </button>
@@ -185,8 +264,56 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Select Role Radio Group */}
+            {/* One-Click Demo Role Logins */}
             <div className="pt-2">
+              <span className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                One-Click Demo Logins
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo("INST_ADMIN")}
+                  disabled={loading}
+                  className={`rounded-lg border px-2.5 py-2 text-left text-xs font-medium transition-all ${
+                    selectedRole === "INST_ADMIN"
+                      ? "border-blue-500 bg-blue-50/90 text-blue-800 ring-1 ring-blue-500"
+                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="block font-bold">🏛️ Inst. Admin</span>
+                  <span className="block text-[10px] text-slate-500 truncate">admin@xyzcollege...</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo("AICTE_ADMIN")}
+                  disabled={loading}
+                  className={`rounded-lg border px-2.5 py-2 text-left text-xs font-medium transition-all ${
+                    selectedRole === "AICTE_ADMIN"
+                      ? "border-indigo-500 bg-indigo-50/90 text-indigo-800 ring-1 ring-indigo-500"
+                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="block font-bold">🇮🇳 AICTE Admin</span>
+                  <span className="block text-[10px] text-slate-500 truncate">admin@aicte.gov.in</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo("VERIFIER")}
+                  disabled={loading}
+                  className={`rounded-lg border px-2.5 py-2 text-left text-xs font-medium transition-all ${
+                    selectedRole === "VERIFIER"
+                      ? "border-emerald-500 bg-emerald-50/90 text-emerald-800 ring-1 ring-emerald-500"
+                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="block font-bold">🔍 Verifier</span>
+                  <span className="block text-[10px] text-slate-500 truncate">verifier@tcs.com</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Select Role Radio Group */}
+            <div className="pt-2 border-t border-slate-100">
               <span className="block text-xs font-semibold text-slate-700 mb-2">
                 Select Role
               </span>
@@ -197,10 +324,10 @@ export default function LoginPage() {
                     name="role"
                     value="INST_ADMIN"
                     checked={selectedRole === "INST_ADMIN"}
-                    onChange={(e) => setSelectedRole(e.target.value)}
+                    onChange={() => handleRoleChange("INST_ADMIN")}
                     className="w-3.5 h-3.5 text-blue-600 focus:ring-blue-500"
                   />
-                  <span>Institution Admin</span>
+                  <span>Institution Admin (MIT / XYZ College)</span>
                 </label>
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
@@ -208,10 +335,10 @@ export default function LoginPage() {
                     name="role"
                     value="AICTE_ADMIN"
                     checked={selectedRole === "AICTE_ADMIN"}
-                    onChange={(e) => setSelectedRole(e.target.value)}
+                    onChange={() => handleRoleChange("AICTE_ADMIN")}
                     className="w-3.5 h-3.5 text-blue-600 focus:ring-blue-500"
                   />
-                  <span>AICTE Admin</span>
+                  <span>AICTE Admin (National Oversight)</span>
                 </label>
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
@@ -219,21 +346,21 @@ export default function LoginPage() {
                     name="role"
                     value="VERIFIER"
                     checked={selectedRole === "VERIFIER"}
-                    onChange={(e) => setSelectedRole(e.target.value)}
+                    onChange={() => handleRoleChange("VERIFIER")}
                     className="w-3.5 h-3.5 text-blue-600 focus:ring-blue-500"
                   />
-                  <span>Verifier / Employer</span>
+                  <span>Verifier / Employer (TCS / Corporate HR)</span>
                 </label>
               </div>
             </div>
 
             {/* Forgot Password Link */}
-            <div className="text-left pt-2">
+            <div className="text-left pt-1">
               <a
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  alert("Password reset instructions sent to institution administrator.");
+                  alert("Demo password for all accounts is 'Demo@admin' (or 'Demo@1234').");
                 }}
                 className="text-xs font-medium text-blue-600 hover:underline"
               >

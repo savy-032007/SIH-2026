@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: APAAR-SETU FastAPI backend on Lambda with a public Function URL.
+
+Parameters:
+  DatabaseUrl:
+    Type: String
+    NoEcho: true
+    Description: >-
+      Reachable PostgreSQL SQLAlchemy URL. The database is managed separately;
+      this stack creates no database or paid always-on networking resources.
+  WebOrigin:
+    Type: String
+    Default: https://apaar-setu-frontend.vercel.app
+    Description: Production frontend origin allowed to call this API.
+  FieldMasterKey:
+    Type: String
+    NoEcho: true
+    Description: Base64 encoded 32-byte field encryption key; generate a unique value.
+  HashPepper:
+    Type: String
+    NoEcho: true
+    Description: Unique high-entropy HMAC pepper for lookup hashes.
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    Description: Unique high-entropy JWT signing secret.
+  DemoUserPassword:
+    Type: String
+    NoEcho: true
+    Description: Password used only if demo users are seeded into the database.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures:
+      - arm64
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        ENVIRONMENT: production
+        LOG_LEVEL: INFO
+        DATABASE_URL: !Ref DatabaseUrl
+        WEB_ORIGIN: !Ref WebOrigin
+        FIELD_MASTER_KEY: !Ref FieldMasterKey
+        HASH_PEPPER: !Ref HashPepper
+        JWT_SECRET: !Ref JwtSecret
+        DEMO_USER_PASSWORD: !Ref DemoUserPassword
+        KEY_PROVIDER: local
+        KEY_ID: lambda-env-v1
+        ABC_REGISTRY_IMPL: mock
+        DIGILOCKER_IMPL: apisetu_sandbox
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: apaar-setu-api
+      CodeUri: .
+      Handler: app.lambda_handler.handler
+      Description: APAAR-SETU FastAPI application adapted with Mangum.
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  ApiFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt ApiFunction.Arn
+      AuthType: NONE
+      Cors:
+        AllowCredentials: true
+        AllowHeaders:
+          - authorization
+          - content-type
+          - x-requested-with
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+        AllowOrigins:
+          - !Ref WebOrigin
+          - http://localhost:3000
+          - http://127.0.0.1:3000
+        MaxAge: 600
+
+  ApiFunctionUrlPublicPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+      InvokedViaFunctionUrl: true
+
+  ApiFunctionUrlInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: "*"
+      InvokedViaFunctionUrl: true
+
+Outputs:
+  ApiUrl:
+    Description: Public HTTPS Lambda Function URL.
+    Value: !GetAtt ApiFunctionUrl.FunctionUrl
+  ApiHealthUrl:
+    Description: Health endpoint (requires the configured PostgreSQL database).
+    Value: !Sub "${ApiFunctionUrl.FunctionUrl}health"
+  ApiDocsUrl:
+    Description: OpenAPI documentation.
+    Value: !Sub "${ApiFunctionUrl.FunctionUrl}docs"

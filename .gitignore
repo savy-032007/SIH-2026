@@ -36,3 +36,6 @@ Thumbs.db
 
 # Docker local volumes
 .docker/
+/services/api/.aws-sam/
+
+APAAR-SETU/

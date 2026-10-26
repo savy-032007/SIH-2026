@@ -117,6 +117,7 @@ class Role(StrEnum):
     AICTE_ANALYST = "AICTE_ANALYST"
     INST_ADMIN = "INST_ADMIN"
     INST_OPERATOR = "INST_OPERATOR"
+    VERIFIER = "VERIFIER"
 
 
 class ConsentPurpose(StrEnum):

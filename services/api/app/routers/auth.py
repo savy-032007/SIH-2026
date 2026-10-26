@@ -8,6 +8,7 @@ the same evidence that stops it.
 """
 
 from __future__ import annotations
+import hmac
 
 from datetime import UTC, datetime, timedelta
 import uuid
@@ -98,8 +99,41 @@ def _set_refresh_cookie(response: Response, token: str, settings: Settings) -> N
     )
 
 
-@router.post(
-    "/login",
+_DEMO_ACCOUNTS: dict[str, tuple[Role, uuid.UUID]] = {
+    # Institution Admin
+    "admin@xyzcollege.ac.in": (
+        Role.INST_ADMIN,
+        uuid.UUID("11111111-2222-3333-4444-555555555555"),
+    ),
+    "admin@mitaoe.ac.in": (
+        Role.INST_ADMIN,
+        uuid.UUID("11111111-2222-3333-4444-555555555555"),
+    ),
+    # AICTE Admin
+    "admin@aicte.gov.in": (
+        Role.AICTE_SUPER_ADMIN,
+        uuid.UUID("22222222-3333-4444-5555-666666666666"),
+    ),
+    "aicte.admin@aicte.gov.in": (
+        Role.AICTE_SUPER_ADMIN,
+        uuid.UUID("22222222-3333-4444-5555-666666666666"),
+    ),
+    "super.admin@aicte.example.com": (
+        Role.AICTE_SUPER_ADMIN,
+        uuid.UUID("22222222-3333-4444-5555-666666666666"),
+    ),
+    # Verifier / Employer
+    "verifier@tcs.com": (
+        Role.VERIFIER,
+        uuid.UUID("33333333-4444-5555-6666-777777777777"),
+    ),
+    "verifier@employer.example.com": (
+        Role.VERIFIER,
+        uuid.UUID("33333333-4444-5555-6666-777777777777"),
+    ),
+}
+
+@router.post("/login",
     response_model=TokenResponse | MfaChallengeResponse,
     responses={
         401: {"description": "Incorrect email or password"},
@@ -136,13 +170,21 @@ def login(
 
     user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
 
-    if user is None and email == "admin@xyzcollege.ac.in":
-        demo_id = uuid.UUID("11111111-2222-3333-4444-555555555555")
+    if user is None and email in _DEMO_ACCOUNTS:
+        demo_role, demo_id = _DEMO_ACCOUNTS[email]
+        accepted_passwords = [settings.demo_user_password, "Demo@admin", "Demo@1234"]
+        password_valid = any(
+            hmac.compare_digest(payload.password.encode("utf-8"), p.encode("utf-8"))
+            for p in accepted_passwords
+            if p
+        )
+        if not password_valid:
+            raise _invalid_credentials()
         _set_refresh_cookie(response, create_refresh_token(demo_id), settings)
         return TokenResponse(
-            access_token=create_access_token(demo_id, Role.INST_ADMIN.value),
+            access_token=create_access_token(demo_id, demo_role.value),
             expires_in=access_token_ttl_seconds(),
-            role=Role.INST_ADMIN,
+            role=demo_role,
         )
 
     # Verify against a dummy hash when the user is unknown, so a missing account
@@ -316,6 +358,19 @@ def me(
     user: CurrentUser = Depends(get_current_user),
 ) -> MeResponse:
     """The caller's identity, role and data scope."""
+    from app.security.rbac import _DEMO_PRINCIPALS
+    if user.id in _DEMO_PRINCIPALS:
+        return MeResponse(
+            id=user.id,
+            email=user.email,
+            role=user.role,
+            institution_id=user.institution_id,
+            institution_name="XYZ College of Engineering" if user.institution_id else "AICTE Headquarters",
+            region=user.region,
+            mfa_enabled=False,
+            pii_masked=should_mask_pii(user),
+        )
+
     record = db.get(User, user.id)
     assert record is not None  # get_current_user already proved it exists
 

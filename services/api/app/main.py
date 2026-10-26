@@ -8,6 +8,7 @@ section 12).
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -52,13 +53,17 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.web_origin, "http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-)
+# Lambda Function URLs add their configured CORS headers outside the ASGI app.
+# Avoid returning a second Access-Control-Allow-Origin header in that runtime;
+# local Uvicorn and Docker Compose continue to use FastAPI's CORS middleware.
+if not os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.web_origin, "http://localhost:3000", "http://127.0.0.1:3000"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
 
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(institution.router, prefix=API_PREFIX)

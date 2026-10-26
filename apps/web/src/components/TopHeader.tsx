@@ -110,10 +110,10 @@ export function TopHeader({
           </div>
           <div className="text-left">
             <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
-              {adminName}
+              {displayName}
             </div>
             <div className="text-[10px] text-slate-500 leading-none">
-              {adminRole}
+              {displayRole}
             </div>
           </div>
         </Link>
